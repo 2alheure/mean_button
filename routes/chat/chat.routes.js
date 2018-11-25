@@ -3,7 +3,9 @@ Imports
 */
 const express = require('express');
 const chatRouter = express.Router({ mergeParams: true });
-const { register, login } = require('./chat.controller');
+const { send, retrieveAll, del } = require('./chat.controller');
+const checker = require('../../services/request.checker');
+const response = require('../../services/server.response');
 //
 
 /*
@@ -15,37 +17,56 @@ class ChatRouterClass {
         chatRouter.get('/', (req, res) => {
             res.json('HATEOAS for chat');
         });
-
-        // Retrieve one
-        chatRouter.get('/:id', (req, res) => {
-            // Use controller function
-            retrieve(req.params.id)
-            .then( apiResponse => res.json(apiResponse) )
-            .catch( apiResponse => res.json(apiResponse) )
-        });
         
         // Retrieve all
         chatRouter.get('/all', (req, res) => {
             // Use controller function
-            retrieveAll(req.body)
-            .then( apiResponse => res.json(apiResponse) )
-            .catch( apiResponse => res.json(apiResponse) )
+            if (req.body === null || typeof req.body === 'undefined') response.sendBodyError(res, 'No data in body');
+
+            var check = checker.checkFields(['token'], req.body);
+            var user_id = checker.checkUserToken(req.body.token);
+
+            if (user_id) {
+                if (check.ok) {
+                    retrieveAll()
+                    .then( apiResponse => response.sendApiSuccessResponse(res, 'Success', apiResponse) )
+                    .catch( apiResponse => response.sendApiErrorResponse(res, 'Error', apiResponse) );
+                } else response.sendFieldsError(res, 'Bad arguments', check.miss, check.extra);
+            } else response.sendTokenErrorResponse(res);
         });
         
         // Send
         chatRouter.post('/send', (req, res) => {
             // Use controller function
-            send(req.body)
-            .then( apiResponse => res.json(apiResponse) )
-            .catch( apiResponse => res.json(apiResponse) )
+            if (req.body === null || typeof req.body === 'undefined') response.sendBodyError(res, 'No data in body');
+
+            var check = checker.checkFields(['token', 'message'], req.body);
+            var user_id = checker.checkUserToken(req.body.token);
+
+            if (user_id) {
+                if (check.ok) {
+                    send(req.body, user_id)
+                    .then( apiResponse => response.sendApiSuccessResponse(res, 'Success', apiResponse) )
+                    .catch( apiResponse => response.sendApiErrorResponse(res, 'Error', apiResponse) );
+                } else response.sendFieldsError(res, 'Bad arguments', check.miss, check.extra);
+            } else response.sendTokenErrorResponse(res);
         });
 
         // Delete
         chatRouter.delete('/', (req, res) => {
             // Use controller function
-            del(req.body)
-            .then( apiResponse => res.json(apiResponse) )
-            .catch( apiResponse => res.json(apiResponse) )
+            if (req.body === null || typeof req.body === 'undefined') response.sendBodyError(res, 'No data in body');
+
+            var check = checker.checkFields(['token', 'id'], req.body);
+            var user_id = checker.checkUserToken(req.body.token);
+
+            if (user_id) {
+                if (check.ok) {
+                    del(req.body, user_id)
+                    .then( apiResponse => response.sendApiSuccessResponse(res, 'Success', apiResponse) )
+                    .catch( apiResponse => response.sendApiErrorResponse(res, 'Error', apiResponse) );
+                } else response.sendFieldsError(res, 'Bad arguments', check.miss, check.extra);
+            } else response.sendTokenErrorResponse(res);
         });
     };
 

@@ -11,15 +11,14 @@ Functions
     const register = body => {
         // Search for user
         return new Promise( (resolve, reject) => {
-
             UserModel.findOne({ email: body.email }, (error, user) => {
-                if(error){ // Mongo Error
+                if (error) { // Mongo Error
                     return reject(error)
                 }
-                else if(user){ // User already exist
+                else if (user) { // User already exist
                     return reject(user)
                 }
-                else{ // Register new user
+                else { // Register new user
                     // Crypt password
                     bcrypt.hash(body.password, 10)
                     .then( hashedPassword => {
@@ -50,9 +49,9 @@ Functions
         return new Promise( (resolve, reject ) => {
 
             UserModel.findOne( { email: body.email }, (error, user) => {
-                if(error) reject(error)
-                else if( !user ) reject('User not found')
-                else{
+                if (error) reject(error)
+                else if ( !user ) reject('User not found')
+                else {
                     // Check password
                     const validPassword = bcrypt.compareSync( body.password, user.password )
 

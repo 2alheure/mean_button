@@ -33,8 +33,10 @@ Method
             password: this.password,
             expireIn: '10s',
             exp: parseInt(expiry.getTime() / 100, 10)
-        }, process.env.JWT_SECRET )
+        }, process.env.JWT_SECRET);
     };
+
+    
 //
 
 /*
